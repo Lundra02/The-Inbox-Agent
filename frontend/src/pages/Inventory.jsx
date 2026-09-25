@@ -1,47 +1,85 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../api/api";
-import styles from "./Inbox.module.css";
+import styles from "./Inventory.module.css";
+import { filterAndSortItems, statusLabel } from "./inventoryLogic";
 
-function StockRow({ item, refresh }) {
-  const [quantity, setQuantity] = useState(item.quantity);
-  const [incoming, setIncoming] = useState(item.incomingQuantity);
-  const [arrival, setArrival] = useState(item.expectedArrival || "");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  useEffect(() => { setQuantity(item.quantity); setIncoming(item.incomingQuantity); setArrival(item.expectedArrival || ""); }, [item.quantity, item.incomingQuantity, item.expectedArrival]);
-  async function save(e) {
-    e.preventDefault(); setBusy(true); setError("");
-    try { await api.patch(`/api/inventory/${encodeURIComponent(item.sku)}`, { quantity: Number(quantity), incomingQuantity: Number(incoming), expectedArrival: arrival }); await refresh(); }
-    catch { setError("Could not save stock. Please retry."); }
-    finally { setBusy(false); }
-  }
-  return <form className={styles.stockRow} onSubmit={save}>
-    <div><strong>{item.name}</strong><p>{item.quantity > 0 ? "In stock" : item.incomingQuantity > 0 ? "Coming soon" : "Out of stock"} · €{item.priceEUR}</p><small>{item.sku}</small></div>
-    <label>Available units<input type="number" min="0" max="1000000" required value={quantity} onChange={e => setQuantity(e.target.value)} /></label>
-    <label>Incoming units<input type="number" min="0" max="1000000" required value={incoming} onChange={e => setIncoming(e.target.value)} /></label>
-    <label>Expected arrival<input type="date" value={arrival} onChange={e => setArrival(e.target.value)} /></label>
-    <button disabled={busy}>{busy ? "Saving…" : "Save stock"}</button>
-    {error && <p role="alert">{error}</p>}
-  </form>;
-}
+const emptyForm = { sku: "", name: "", priceEUR: "", quantity: 0, incomingQuantity: 0, expectedArrival: "", installmentsEligible: false, lowStockThreshold: 3 };
 
 export default function Inventory() {
   const [data, setData] = useState(null);
-  const [error, setError] = useState("");
+  const [form, setForm] = useState(emptyForm);
+  const [editingSku, setEditingSku] = useState(null);
+  const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [sort, setSort] = useState("name");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
   async function refresh() {
     try { const response = await api.get("/api/inventory"); setData(response.data); setError(""); }
-    catch { setError("Live stock unavailable. Displayed values may be outdated."); }
+    catch { setError("Live stock is unavailable. Please retry."); }
   }
-  useEffect(() => { refresh(); const timer = setInterval(refresh, 10000); return () => clearInterval(timer); }, []);
-  const items = data?.items || [];
-  return <section className={styles.panel}>
-    <div className={styles.sectionHeading}><h2>Live stock</h2><button onClick={refresh}>Refresh stock</button></div>
-    <p className={styles.muted}>Editable demo inventory stored in the shop database. Refreshes every 10 seconds; the agent checks it before each product answer. No supplier feed is connected.</p>
-    <p>{items.filter(i => i.quantity > 0).length} in stock · {items.filter(i => i.quantity === 0).length} unavailable · {items.filter(i => i.incomingQuantity > 0).length} with incoming deliveries</p>
-    <select aria-label="Filter stock" value={filter} onChange={e => setFilter(e.target.value)}><option value="all">All items</option><option value="in_stock">In stock</option><option value="missing">Out of stock</option><option value="incoming">Incoming</option></select>
-    {error && <p role="alert">{error}</p>}
-    {data && <p className={styles.muted}>Last checked: {new Date(data.checkedAt).toLocaleTimeString()}</p>}
-    {items.filter(i => filter === "all" || (filter === "in_stock" ? i.quantity > 0 : filter === "missing" ? i.quantity === 0 : i.incomingQuantity > 0)).map(item => <StockRow key={item.sku} item={item} refresh={refresh} />)}
-  </section>;
+  useEffect(() => { refresh(); }, []);
+
+  function updateField(event) {
+    const { name, value, type, checked } = event.target;
+    setForm(previous => ({ ...previous, [name]: type === "checkbox" ? checked : value }));
+  }
+
+  function beginEdit(item) {
+    setEditingSku(item.sku);
+    setForm({ ...item, priceEUR: item.priceEUR, quantity: item.quantity, incomingQuantity: item.incomingQuantity, expectedArrival: item.expectedArrival || "" });
+    setMessage(""); setError("");
+  }
+
+  function resetForm() { setEditingSku(null); setForm(emptyForm); }
+
+  async function save(event) {
+    event.preventDefault();
+    setBusy(true); setMessage(""); setError("");
+    const payload = { name: form.name, priceEUR: Number(form.priceEUR), quantity: Number(form.quantity), incomingQuantity: Number(form.incomingQuantity), expectedArrival: form.expectedArrival, installmentsEligible: form.installmentsEligible, lowStockThreshold: Number(form.lowStockThreshold) };
+    try {
+      if (editingSku) await api.patch(`/api/inventory/${encodeURIComponent(editingSku)}`, { ...payload, version: form.__v });
+      else await api.post("/api/inventory", { sku: form.sku, ...payload });
+      resetForm(); await refresh(); setMessage(editingSku ? "Stock updated successfully." : "Stock item created successfully.");
+    } catch (requestError) { setError(requestError.response?.data?.error || "Could not save stock item."); }
+    finally { setBusy(false); }
+  }
+
+  async function remove(item) {
+    if (!window.confirm(`Delete ${item.name} (${item.sku})? This cannot be undone.`)) return;
+    setBusy(true); setMessage(""); setError("");
+    try { await api.delete(`/api/inventory/${encodeURIComponent(item.sku)}`); await refresh(); setMessage("Stock item deleted successfully."); }
+    catch (requestError) { setError(requestError.response?.data?.error || "Could not delete stock item."); }
+    finally { setBusy(false); }
+  }
+
+  const items = useMemo(() => filterAndSortItems(data?.items || [], query, filter, sort), [data, filter, query, sort]);
+
+  return <main className={styles.page}>
+    <header className={styles.header}><div><p className={styles.eyebrow}>OPERATIONS · CATALOG</p><h1>Live stock</h1><p>Manage the quantities and availability the agent reports to customers.</p></div><button className={styles.refresh} onClick={refresh} disabled={busy}>Refresh stock</button></header>
+    <section className={styles.panel}>
+      <div className={styles.sectionHeading}><h2>{editingSku ? "Edit stock item" : "Add stock item"}</h2>{editingSku && <button className={styles.secondary} onClick={resetForm}>Cancel</button>}</div>
+      <form className={styles.form} onSubmit={save}>
+        <label>SKU<input name="sku" value={form.sku} onChange={updateField} pattern="[a-z0-9][a-z0-9-]{1,59}" disabled={Boolean(editingSku)} required /></label>
+        <label>Product name<input name="name" value={form.name} onChange={updateField} maxLength={100} required /></label>
+        <label>Price EUR<input name="priceEUR" type="number" min="0" step="0.01" value={form.priceEUR} onChange={updateField} required /></label>
+        <label>Available<input name="quantity" type="number" min="0" max="1000000" step="1" value={form.quantity} onChange={updateField} required /></label>
+        <label>Incoming<input name="incomingQuantity" type="number" min="0" max="1000000" step="1" value={form.incomingQuantity} onChange={updateField} required /></label>
+        <label>Expected arrival<input name="expectedArrival" type="date" value={form.expectedArrival} onChange={updateField} /></label>
+        <label>Low-stock alert<input name="lowStockThreshold" type="number" min="0" max="1000000" step="1" value={form.lowStockThreshold} onChange={updateField} required /></label>
+        <label className={styles.checkbox}><input name="installmentsEligible" type="checkbox" checked={form.installmentsEligible} onChange={updateField} /> Installments eligible</label>
+        <button disabled={busy}>{busy ? "Saving..." : editingSku ? "Save changes" : "Create item"}</button>
+      </form>
+    </section>
+    <section className={styles.panel}>
+      <div className={styles.sectionHeading}><h2>Inventory <small>({items.length})</small></h2><div className={styles.controls}><input aria-label="Search stock" placeholder="Search SKU or product" value={query} onChange={event => setQuery(event.target.value)} /><select aria-label="Filter stock" value={filter} onChange={event => setFilter(event.target.value)}><option value="all">All statuses</option><option value="in_stock">In stock</option><option value="incoming">Incoming</option><option value="out_of_stock">Out of stock</option></select><select aria-label="Sort stock" value={sort} onChange={event => setSort(event.target.value)}><option value="name">Sort: name</option><option value="quantity">Sort: quantity</option><option value="status">Sort: status</option></select></div></div>
+      {message && <p className={styles.success} role="status">{message}</p>}{error && <p className={styles.error} role="alert">{error}</p>}
+      <div className={styles.table} role="table"><div className={styles.tableHeader} role="row"><span>SKU</span><span>Product</span><span>Available</span><span>Incoming</span><span>Arrival</span><span>Status</span><span>Actions</span></div>
+        {items.map(item => <div className={styles.row} role="row" key={item.sku}><span>{item.sku}</span><strong>{item.name}</strong><span>{item.quantity}</span><span>{item.incomingQuantity}</span><span>{item.expectedArrival || "Not confirmed"}</span><span className={item.quantity > 0 ? styles.inStock : item.incomingQuantity > 0 ? styles.comingSoon : styles.outOfStock}>{statusLabel(item)}</span><span className={styles.actions}><button className={styles.secondary} onClick={() => beginEdit(item)} disabled={busy}>Edit</button><button className={styles.danger} onClick={() => remove(item)} disabled={busy}>Delete</button></span></div>)}
+        {!items.length && <p className={styles.empty}>No stock items match your filters.</p>}
+      </div>
+    </section>
+  </main>;
 }

@@ -8,6 +8,7 @@ import { withConversationLock } from "../services/conversationLock.js";
 import { processInboxMessage, challengeMessages } from "../services/inboxService.js";
 import StaffReply from "../models/StaffReply.js";
 import { createStaffReply } from "../services/staffReplies.js";
+import InventoryItem from "../models/InventoryItem.js";
 
 const router = Router();
 router.get("/conversations", async (req, res) => {
@@ -53,7 +54,22 @@ router.post("/cases/:id/replies", async (req, res) => {
   catch (error) { res.status(409).json({ error: error instanceof mongoose.Error || error.name === "MongoServerError" ? "Reply storage unavailable. Refresh before retrying." : error.message }); }
 });
 router.get("/cases", async (req, res) => {
-  try { res.json(await InboxCase.find().sort({ createdAt: -1 }).limit(100).lean()); }
+  const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 25));
+  const status = req.query.status;
+  const channel = req.query.channel;
+  const query = {};
+  if (status === "open") query.status = { $ne: "resolved" };
+  if (status === "resolved") query.status = "resolved";
+  if (status === "escalated") query.$or = [{ status: "needs_human" }, { decision: "escalate" }];
+  if (["demo", "messenger", "instagram"].includes(channel)) query.channel = channel;
+  try {
+    const [items, total] = await Promise.all([
+      InboxCase.find(query).sort({ createdAt: -1, _id: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      InboxCase.countDocuments(query),
+    ]);
+    res.set({ "Cache-Control": "no-store", "X-Total-Count": String(total), "X-Page": String(page), "X-Page-Size": String(limit) }).json(items);
+  }
   catch { res.status(503).json({ error: "Inbox storage unavailable" }); }
 });
 router.post("/messages", async (req, res) => {
@@ -92,15 +108,21 @@ router.patch("/cases/:id/assign", async (req, res) => {
 });
 router.get("/analytics", async (req, res) => {
   try {
-    const [stats] = await InboxCase.aggregate([{ $group: { _id: null, total: { $sum: 1 },
-      automated: { $sum: { $cond: [{ $eq: ["$decision", "autonomous"] }, 1, 0] } },
-      escalated: { $sum: { $cond: [{ $eq: ["$decision", "escalate"] }, 1, 0] } },
-      waiting: { $sum: { $cond: [{ $eq: ["$status", "needs_human"] }, 1, 0] } },
-      averageProcessingMs: { $avg: { $cond: [{ $ne: ["$replySuppressed", true] }, "$elapsedMs", null] } },
-    } }]);
+    const [[stats], openCases, escalations, resolvedCases, inventoryWarnings] = await Promise.all([
+      InboxCase.aggregate([{ $group: { _id: null, total: { $sum: 1 },
+        automated: { $sum: { $cond: [{ $eq: ["$decision", "autonomous"] }, 1, 0] } },
+        escalated: { $sum: { $cond: [{ $eq: ["$decision", "escalate"] }, 1, 0] } },
+        waiting: { $sum: { $cond: [{ $eq: ["$status", "needs_human"] }, 1, 0] } },
+        averageProcessingMs: { $avg: { $cond: [{ $ne: ["$replySuppressed", true] }, "$elapsedMs", null] } },
+      } }]),
+      InboxCase.countDocuments({ status: { $ne: "resolved" } }),
+      InboxCase.countDocuments({ decision: "escalate" }),
+      InboxCase.countDocuments({ status: "resolved" }),
+      InventoryItem.countDocuments({ $expr: { $lte: ["$quantity", { $ifNull: ["$lowStockThreshold", 3] }] } }),
+    ]);
     const result = stats || { total: 0, automated: 0, escalated: 0, waiting: 0, averageProcessingMs: 0 };
     delete result._id;
-    res.json({ ...result, estimatedMinutesSaved: result.automated * 2.5, assumptionMinutesPerAutomaticReply: 2.5 });
+    res.json({ ...result, openCases, escalations, resolvedCases, inventoryWarnings, estimatedMinutesSaved: result.automated * 2.5, assumptionMinutesPerAutomaticReply: 2.5 });
   } catch { res.status(503).json({ error: "Analytics unavailable" }); }
 });
 router.get("/scorecard", async (req, res) => {

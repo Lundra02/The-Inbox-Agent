@@ -1,0 +1,42 @@
+import "dotenv/config";
+import test from "node:test";
+import assert from "node:assert/strict";
+import express from "express";
+import mongoose from "mongoose";
+import inventoryRoutes from "../src/routes/inventoryRoutes.js";
+import StaffAccount from "../src/models/StaffAccount.js";
+import StaffSession from "../src/models/StaffSession.js";
+import InventoryItem from "../src/models/InventoryItem.js";
+import { digest, hashPassword } from "../src/services/staffAuth.js";
+
+test("staff can create, update, and delete inventory while invalid quantities are rejected", async t => {
+  assert.ok(process.env.MONGO_URI, "MONGO_URI is required for inventory integration tests");
+  const dbName = `inbox_inventory_test_${Date.now()}`;
+  await mongoose.connect(process.env.MONGO_URI, { dbName });
+  const token = "b".repeat(64);
+  await StaffAccount.create({ _id: "primary", username: "stock-test", displayName: "Stock Test", passwordHash: await hashPassword("StockTestPassword123") });
+  await StaffSession.create({ tokenHash: digest(token), staffId: "primary", expiresAt: new Date(Date.now() + 60_000) });
+  const app = express();
+  app.use(express.json());
+  app.use("/api/inventory", inventoryRoutes);
+  const server = app.listen(0, "127.0.0.1");
+  await new Promise(resolve => server.once("listening", resolve));
+  const url = `http://127.0.0.1:${server.address().port}/api/inventory`;
+  const request = (path = "", options = {}) => fetch(`${url}${path}`, { ...options, headers: { "Content-Type": "application/json", Cookie: `inbox_session=${token}`, ...(options.headers || {}) } });
+  t.after(async () => { server.closeAllConnections(); server.close(); await InventoryItem.deleteMany({}); await mongoose.connection.dropDatabase(); await mongoose.disconnect(); });
+
+  const invalid = await request("", { method: "POST", body: JSON.stringify({ sku: "test-stock", name: "Test stock", priceEUR: 10, quantity: -1 }) });
+  assert.equal(invalid.status, 400);
+  const created = await request("", { method: "POST", body: JSON.stringify({ sku: "test-stock", name: "Test stock", priceEUR: 10, quantity: 2, incomingQuantity: 4, expectedArrival: "2026-10-01" }) });
+  assert.equal(created.status, 201);
+  const item = await created.json();
+  assert.equal(item.quantity, 2);
+  const updated = await request("/test-stock", { method: "PATCH", body: JSON.stringify({ version: item.__v, name: "Renamed stock", quantity: 0, incomingQuantity: 4, expectedArrival: "2026-10-01" }) });
+  assert.equal(updated.status, 200);
+  assert.equal((await updated.json()).status, "coming_soon");
+  const listed = await request();
+  assert.equal((await listed.json()).items[0].name, "Renamed stock");
+  const deleted = await request("/test-stock", { method: "DELETE" });
+  assert.deepEqual(await deleted.json(), { deleted: true, sku: "test-stock" });
+  assert.equal((await request("/test-stock", { method: "DELETE" })).status, 404);
+});

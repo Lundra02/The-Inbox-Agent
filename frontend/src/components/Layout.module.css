@@ -63,9 +63,32 @@
   text-decoration: none;
 }
 
+.logout {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid #536259;
+  background: transparent;
+  color: #b9c2bc;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.logout:hover {
+  background: #26332c;
+  color: #ffffff;
+}
+
 .navLink:hover {
   background: #26332c;
   color: #ffffff;
+}
+
+.navLink:focus-visible,
+.logout:focus-visible,
+.brand:focus-visible {
+  outline: 3px solid #8cc7a0;
+  outline-offset: 2px;
 }
 
 .active {
@@ -108,7 +131,7 @@
   }
 
   .navigation {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: 20px;
   }
 
@@ -130,5 +153,11 @@
 
   .content {
     padding: 28px 20px;
+  }
+
+  .logout {
+    width: 100%;
+    margin-top: 12px;
+    text-align: center;
   }
 }

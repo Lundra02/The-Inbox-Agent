@@ -24,6 +24,18 @@ Backend variables are documented in `backend/.env.example`: `MONGO_URI`, `PORT`,
 
 Secrets belong only in local environment files. The frontend does not require secrets.
 
+## Local dashboard credentials
+
+Use these credentials for the local staff dashboard:
+
+```text
+Display name: auralith
+Username: auralith
+Password: Auralith12345
+```
+
+Create this account on the first local dashboard visit when the setup screen appears. Do not reuse these demo credentials in production.
+
 ## Run locally
 
 Install dependencies once, then use separate terminals. Start MongoDB before the backend and run one backend worker.

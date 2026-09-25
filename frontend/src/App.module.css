@@ -11,10 +11,29 @@
 }
 
 :global(button),
-:global(input) {
+:global(input),
+:global(select),
+:global(textarea) {
   font: inherit;
 }
 
 :global(a) {
   color: inherit;
+}
+
+:global(button:focus-visible),
+:global(a:focus-visible),
+:global(input:focus-visible),
+:global(select:focus-visible),
+:global(textarea:focus-visible) {
+  outline: 3px solid #72b995;
+  outline-offset: 3px;
+}
+
+:global(.auth-loading) {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #507060;
+  background: #f4f5f3;
 }

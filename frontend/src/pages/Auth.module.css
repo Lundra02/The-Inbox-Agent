@@ -1,0 +1,12 @@
+.page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #f4f5f3; }
+.panel { width: min(100%, 440px); padding: 34px; background: #fff; border: 1px solid #dde3de; border-radius: 14px; box-shadow: 0 18px 45px rgb(24 33 29 / 8%); }
+.eyebrow { margin: 0; color: #507060; font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+.panel h1 { margin: 10px 0; color: #18211d; font-size: 30px; }
+.muted { color: #68746c; font-size: 13px; line-height: 1.6; }
+.panel label { display: block; margin: 20px 0 8px; color: #263d2e; font-size: 13px; font-weight: 600; }
+.panel input { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; padding: 11px; border: 1px solid #bbc9bf; border-radius: 6px; font: inherit; }
+.panel button { width: 100%; margin-top: 20px; padding: 12px 16px; border: 0; border-radius: 7px; background: #205d43; color: #fff; cursor: pointer; font: inherit; }
+.panel button:disabled { cursor: wait; opacity: .6; }
+.panel input:focus-visible, .panel button:focus-visible { outline: 3px solid #72b995; outline-offset: 3px; }
+.error { padding: 12px; border-radius: 7px; background: #fff0f0; color: #8c2424; font-size: 13px; }
+@media (max-width: 480px) { .page { padding: 16px; } .panel { padding: 24px 20px; } .panel h1 { font-size: 26px; } }

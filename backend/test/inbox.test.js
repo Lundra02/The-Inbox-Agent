@@ -71,3 +71,4 @@ test("same conversation requests serialize and lock releases after errors", asyn
   await assert.rejects(withConversationLock("lock-test", async () => { throw new Error("expected"); }));
   assert.equal(await withConversationLock("lock-test", async () => 42), 42);
 });
+

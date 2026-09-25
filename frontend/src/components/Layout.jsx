@@ -3,9 +3,10 @@ import styles from "./Layout.module.css";
 
 const navigation = [
   { to: "/", label: "Customer inbox", end: true },
+  { to: "/stock", label: "Live stock", end: true },
 ];
 
-export default function Layout() {
+export default function Layout({ onLogout }) {
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
@@ -37,6 +38,7 @@ export default function Layout() {
         <a className={styles.navLink} href="https://m.me/1290531860817953" target="_blank" rel="noopener noreferrer">
           Chat on Messenger
         </a>
+        <button className={styles.logout} onClick={onLogout} type="button">Sign out</button>
       </aside>
 
       <main className={styles.content}>
