@@ -1,0 +1,51 @@
+.page { max-width: 1350px; margin: auto; padding: 32px; }
+.header, .sectionHeading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.header { margin-bottom: 26px; }
+.header h1 { margin: 8px 0; font-size: clamp(28px, 3vw, 40px); letter-spacing: -1.5px; }
+.header p { margin: 8px 0; }
+.eyebrow { font-size: 11px; letter-spacing: 2px; color: #507060; font-weight: 700; }
+.demo { background: #e0eae3; border: 1px solid #c1d4c7; padding: 8px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap; }
+.policies { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #d6ded8; background: #eaf0eb; border-radius: 12px; margin-bottom: 24px; }
+.policies div { padding: 18px 24px; }
+.policies strong, .policies span { display: block; }
+.policies span { margin-top: 5px; font-size: 12px; color: #5a6b60; }
+.workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+.panel { background: white; border: 1px solid #dde3de; border-radius: 14px; padding: 24px; margin-bottom: 22px; }
+.panel h2 { font-size: 19px; margin: 0 0 14px; }
+.panel h3 { font-size: 14px; margin: 20px 0 10px; }
+.panel p { line-height: 1.65; }
+.panel label { display: block; font-size: 13px; margin: 20px 0 8px; font-weight: 600; }
+.panel textarea { display: block; width: 100%; resize: vertical; border: 1px solid #bbc9bf; border-radius: 8px; padding: 14px; font: inherit; line-height: 1.6; margin-bottom: 12px; }
+.panel button { cursor: pointer; border: 0; border-radius: 7px; padding: 11px 16px; background: #205d43; color: #fff; }
+.panel button:disabled { opacity: .55; cursor: wait; }
+.panel button:focus-visible, .panel textarea:focus-visible, .panel select:focus-visible { outline: 3px solid #72b995; outline-offset: 3px; }
+.panel .secondary { background: #eef3ef; color: #205d43; font-size: 12px; }
+.samples { display: grid; gap: 7px; }
+.panel .sample { background: #f6f8f6; color: #27372c; text-align: left; display: flex; gap: 12px; font-size: 12px; line-height: 1.5; border: 1px solid #e2e8e3; }
+.sample span { color: #61816b; font-variant-numeric: tabular-nums; }
+.muted { color: #68746c; font-size: 12px; line-height: 1.6; }
+.empty { padding: 70px 25px; text-align: center; color: #748078; line-height: 1.7; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.tags span, .case > span { padding: 5px 9px; font-size: 11px; border-radius: 5px; background: #eef1ef; }
+.human { background: #fff0d6 !important; color: #854e03; }
+.auto { background: #e7f1e9 !important; color: #256140; }
+.original { padding: 12px 14px; background: #f5f6f4; border-radius: 7px; font-size: 13px; }
+.reply { border-left: 3px solid #6ea785; padding-left: 16px; white-space: pre-wrap; }
+.note { padding: 1px 16px 15px; background: #fff8ea; border: 1px solid #f1dfbd; border-radius: 8px; font-size: 13px; }
+.note small { color: #805e29; }
+.error { color: #8c2424; background: #fff0f0; padding: 14px; border-radius: 8px; }
+.panel input { padding: 10px; border: 1px solid #bbc9bf; border-radius: 6px; margin: 0 8px 10px 0; font: inherit; max-width: 100%; }
+.panel summary { cursor: pointer; font-weight: 600; padding: 5px; }
+.panel select { padding: 8px; border: 1px solid #c9d4cd; border-radius: 6px; background: white; }
+.caseList { display: grid; gap: 8px; }
+.panel .case { display: grid; grid-template-columns: 105px 1fr 90px; align-items: center; gap: 12px; width: 100%; color: #263d2e; background: #f7f9f7; text-align: left; border: 1px solid #e5ebe6; }
+.case strong { font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.case small { color: #6b796f; font-size: 11px; }
+.reference { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; font-size: 13px; }
+@media (max-width: 1050px) { .workspace { grid-template-columns: 1fr; } .page { padding: 20px; } }
+@media (max-width: 600px) { .policies, .reference { grid-template-columns: 1fr; } .header { align-items: start; flex-direction: column; } .panel .case { grid-template-columns: 1fr; } .panel { padding: 18px; } }
+
+.stockRow { display: grid; grid-template-columns: 2fr 1fr 1fr 1.3fr auto; gap: 16px; align-items: center; padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+.stockRow label { display: grid; gap: 6px; font-size: 13px; }
+.stockRow input { width: 100%; box-sizing: border-box; }
+@media (max-width: 900px) { .stockRow { grid-template-columns: 1fr 1fr; } }

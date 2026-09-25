@@ -1,0 +1,118 @@
+.card {
+  padding: 24px;
+  border: 1px solid #d4dcd5;
+  background: #ffffff;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e5e1;
+}
+
+.vehicleLabel,
+.row > span,
+.cardFooter span {
+  display: block;
+  margin: 0 0 5px;
+  color: #647069;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.card h2 {
+  margin: 0;
+  color: #18211d;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.status {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.draft { background: #e7e9e7; color: #59635c; }
+.approved { background: #dcefe3; color: #21623b; }
+.in_progress { background: #dbeaf0; color: #225970; }
+.done { background: #e3e9e4; color: #3d5b45; }
+
+.row {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e0e5e1;
+}
+
+.row > span {
+  margin: 2px 0 0;
+}
+
+.row p {
+  margin: 0;
+  color: #364239;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.areaList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  counter-reset: area;
+}
+
+.areaList li {
+  counter-increment: area;
+  padding: 5px 8px;
+  background: #e4eae5;
+  color: #385045;
+  font-size: 13px;
+}
+
+.areaList li::before {
+  content: counter(area) ". ";
+  font-weight: 700;
+}
+
+.cardFooter {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.6fr) minmax(180px, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  padding-top: 20px;
+}
+
+.cardFooter strong {
+  display: block;
+  color: #1c2b22;
+  font-size: 14px;
+}
+
+.cardFooter a {
+  color: #286144;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cardFooter a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .card { padding: 18px; }
+  .row { grid-template-columns: 1fr; gap: 6px; }
+  .cardFooter { grid-template-columns: 1fr; gap: 14px; }
+}

@@ -1,0 +1,43 @@
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+*.secret
+*secret*
+*credential*
+*credentials*
+*token*
+*.pem
+*.key
+*.crt
+
+# Dependencies and generated Python files
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Frontend and tooling output
+dist/
+build/
+.vite/
+coverage/
+
+# Runtime output and local databases
+*.log
+*.out
+*.err
+*.sqlite
+*.sqlite3
+
+# Local tools and editor metadata
+tools/*.exe
+.vscode/
+.idea/
+*.code-workspace
+Thumbs.db
+.DS_Store

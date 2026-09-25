@@ -1,0 +1,34 @@
+[
+  {
+    "message": "A kini lapptop",
+    "before": "NovaBook 14 laptop: 8 në stok, €720.",
+    "after": "Po, kemi NovaBook 14 laptop. Ka 8 në stok dhe kushton €720. A doni të vazhdoni?",
+    "replyEngine": "generated",
+    "fallback": null,
+    "elapsedMs": 1669
+  },
+  {
+    "message": "Qfar laptopi kini",
+    "before": "NovaBook 14 laptop: 8 në stok, €720.",
+    "after": "Po, kemi NovaBook 14 laptop, 8 në stok dhe kushton €720. A doni ta porosisni?",
+    "replyEngine": "generated",
+    "fallback": null,
+    "elapsedMs": 2096
+  },
+  {
+    "message": "Can I return headphones after 45 days? Box is open.",
+    "before": "The return is denied under our policy: 45 days exceeds the 30-day return window; the box is open and returns require an unopened product.",
+    "after": "I’m sorry, but we can’t accept a return after 45 days. Returns must be within 30 days and the product needs to be unopened.",
+    "replyEngine": "generated",
+    "fallback": null,
+    "elapsedMs": 1588
+  },
+  {
+    "message": "Hello!",
+    "before": "Could you tell us whether you need help with an order, return or product?",
+    "after": "Could you tell us whether you need help with an order, return or product?",
+    "replyEngine": "generated",
+    "fallback": null,
+    "elapsedMs": 1284
+  }
+]

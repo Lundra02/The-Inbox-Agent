@@ -1,0 +1,43 @@
+.page { max-width: 1160px; margin: 0 auto; }
+.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
+.eyebrow { margin: 0 0 7px; color: #647069; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.page h1, .page h2, .page p { margin-top: 0; }
+.page h1 { margin-bottom: 8px; font-size: clamp(28px, 4vw, 38px); line-height: 1.1; }
+.page h2 { margin-bottom: 0; font-size: 20px; }
+.subtle { margin-bottom: 0; color: #647069; font-size: 14px; }
+.legend { display: flex; gap: 16px; color: #5c6860; font-size: 13px; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.legend i { width: 9px; height: 9px; }
+.availableKey { background: #dcefe3; border: 1px solid #9fc8ad; }
+.bookedKey { background: #dfe3e0; border: 1px solid #bfc8c0; }
+.pageState { margin: 40px 0; color: #647069; font-size: 14px; }
+.errorState { color: #8a3f35; }
+.calendar { display: grid; grid-template-columns: 110px repeat(5, minmax(142px, 1fr)); overflow-x: auto; border-top: 1px solid #cfd6d0; border-left: 1px solid #cfd6d0; }
+.calendarRow { display: contents; }
+.cell { min-height: 104px; padding: 10px; border-right: 1px solid #cfd6d0; border-bottom: 1px solid #cfd6d0; }
+.corner { min-height: 58px; color: #647069; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.dayHeader { display: flex; min-height: 58px; align-items: baseline; gap: 8px; color: #647069; font-size: 12px; }
+.dayHeader strong { color: #18211d; font-size: 20px; }
+.timeCell { display: flex; align-items: center; min-height: 104px; color: #536058; font-size: 12px; font-variant-numeric: tabular-nums; }
+.available { width: 100%; min-height: 82px; border: 1px solid #a5cdb1; background: #e3f0e6; color: #21623b; cursor: pointer; font-size: 13px; font-weight: 700; }
+.available:hover { background: #cfe5d5; }
+.booked { min-height: 82px; padding: 11px; background: #e1e5e2; color: #35433a; }
+.booked strong, .booked span { display: block; }
+.booked strong { font-size: 13px; }
+.booked span { margin-top: 6px; color: #607066; font-size: 12px; }
+.empty { display: grid; min-height: 82px; place-items: center; color: #a0aaa2; }
+.modalBackdrop { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 20px; background: rgb(24 33 29 / 48%); }
+.modal { width: min(100%, 440px); padding: 24px; background: #ffffff; box-shadow: 0 12px 40px rgb(21 31 25 / 20%); }
+.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.closeButton { width: 28px; height: 28px; border: 0; background: transparent; color: #4e5b53; cursor: pointer; font-weight: 700; }
+.slotSummary { margin: 20px 0; padding: 12px; background: #edf1ed; color: #3e4d43; font-size: 14px; line-height: 1.45; }
+.form { display: grid; gap: 16px; }
+.form label { display: grid; gap: 7px; color: #465249; font-size: 13px; font-weight: 700; }
+.form select { width: 100%; min-height: 38px; padding: 8px; border: 1px solid #bfc9c1; border-radius: 0; background: #ffffff; color: #18211d; }
+.formError { margin: 0; color: #8a3f35; font-size: 13px; }
+.formActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.secondaryButton, .submitButton { min-height: 38px; padding: 8px 12px; border: 1px solid #829288; cursor: pointer; font-size: 13px; font-weight: 700; }
+.secondaryButton { background: #ffffff; color: #3d4b42; }
+.submitButton { border-color: #1f342a; background: #1f342a; color: #ffffff; }
+.submitButton:disabled { cursor: not-allowed; opacity: 0.55; }
+@media (max-width: 700px) { .pageHeader { display: block; } .legend { margin-top: 18px; } .calendar { grid-template-columns: 100px repeat(5, minmax(130px, 1fr)); } }
